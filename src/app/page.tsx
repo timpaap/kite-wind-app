@@ -26,7 +26,7 @@ export default function Home() {
     loadData();
   }, []);
 
-  const kiteDays = windData.filter((day) => day.avgWindSpeed >= 15);
+  const kiteDays = windData.filter((day) => day.maxWindSpeed >= 15);
 
   const handleExport = () => {
     if (kiteDays.length === 0) {
@@ -53,10 +53,10 @@ export default function Home() {
               <p className="text-3xl font-bold text-green-600">{kiteDays.length}</p>
             </div>
             <div className="bg-white rounded-lg shadow p-4 text-center">
-              <p className="text-gray-600 text-sm font-medium mb-1">Avg Wind</p>
+              <p className="text-gray-600 text-sm font-medium mb-1">Avg Peak Wind</p>
               <p className="text-3xl font-bold text-blue-600">
                 {(
-                  windData.reduce((sum, day) => sum + day.avgWindSpeed, 0) /
+                  windData.reduce((sum, day) => sum + day.maxWindSpeed, 0) /
                   windData.length
                 ).toFixed(1)}{' '}
                 kn
@@ -65,7 +65,7 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Max Wind</p>
               <p className="text-3xl font-bold text-orange-600">
-                {Math.max(...windData.map((d) => d.avgWindSpeed)).toFixed(1)} kn
+                {Math.max(...windData.map((d) => d.maxWindSpeed)).toFixed(1)} kn
               </p>
             </div>
           </div>

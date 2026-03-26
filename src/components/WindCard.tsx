@@ -7,7 +7,8 @@ interface WindCardProps {
 }
 
 export default function WindCard({ day }: WindCardProps) {
-  const isGoodDay = day.avgWindSpeed >= 15;
+  // Use max wind speed for determining if it's a good day (matches other weather apps)
+  const isGoodDay = day.maxWindSpeed >= 15;
   const backgroundColor = day.isWeekend && isGoodDay ? 'bg-green-100 border-green-500' : 'bg-white';
   const borderColor = day.isWeekend && isGoodDay ? 'border-2' : 'border';
 
@@ -50,15 +51,16 @@ export default function WindCard({ day }: WindCardProps) {
         )}
       </div>
 
-      {/* Wind Speed */}
+      {/* Wind Speed - Now showing Peak/Max Wind as primary */}
       <div className="mb-4">
-        <p className="text-xs text-gray-600 mb-1">Average Wind</p>
-        <p className={`text-3xl font-bold ${getWindSpeedColor(day.avgWindSpeed)}`}>
-          {day.avgWindSpeed}
+        <p className="text-xs text-gray-600 mb-1">Peak Wind Speed</p>
+        <p className={`text-3xl font-bold ${getWindSpeedColor(day.maxWindSpeed)}`}>
+          {day.maxWindSpeed}
           <span className="text-lg ml-1">kn</span>
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Max: {day.maxWindSpeed} kn
+          Daytime avg: {day.avgWindSpeed} kn
+          {day.maxGustSpeed ? ` | Gusts: ${day.maxGustSpeed} kn` : ''}
         </p>
       </div>
 
