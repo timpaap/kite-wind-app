@@ -31,9 +31,9 @@ export default function WindCard({ day }: WindCardProps) {
 
       {/* Wind Speed */}
       <div className="mb-6">
-        <p className="text-sm text-gray-500 mb-2">Peak Wind Speed</p>
+        <p className="text-sm text-gray-500 mb-2">Average Wind Speed (10am-7pm)</p>
         <p className="text-3xl font-bold text-gray-900">
-          {day.maxWindSpeed}
+          {day.avgWindSpeed}
           <span className="text-lg ml-1 text-gray-600">kn</span>
         </p>
         <p className="text-sm text-gray-500 mt-2">
