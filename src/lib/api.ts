@@ -109,7 +109,7 @@ export async function fetchWindData(): Promise<WindDay[]> {
               hour12: false,
             }).split(':')[0]
           );
-          return ((localHour - 1 + 24) % 3) === 0; // start at 1h (1,4,7,...) 
+          return localHour % 3 === 0; // start at 0h (0,3,6,9,12,15,18,21)
         })
         .map((item) => ({
           time: item.time,
