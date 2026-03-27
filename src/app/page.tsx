@@ -27,6 +27,9 @@ export default function Home() {
   }, []);
 
   const kiteDays = windData.filter((day) => day.maxWindSpeed >= 15);
+  const firstDay = windData[0];
+  const currentDirection = firstDay?.windDirectionLabel ?? '-';
+  const currentDirectionNumeric = firstDay?.windDirection ?? 0;
 
   const handleExport = () => {
     if (kiteDays.length === 0) {
@@ -47,7 +50,7 @@ export default function Home() {
 
         {/* Stats */}
         {!loading && windData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-white rounded-lg shadow p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Kite Days</p>
               <p className="text-3xl font-bold text-green-600">{kiteDays.length}</p>
@@ -67,6 +70,11 @@ export default function Home() {
               <p className="text-3xl font-bold text-orange-600">
                 {Math.max(...windData.map((d) => d.maxWindSpeed)).toFixed(1)} kn
               </p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 text-center">
+              <p className="text-gray-600 text-sm font-medium mb-1">Wind Direction</p>
+              <p className="text-3xl font-bold text-blue-700">{currentDirection}</p>
+              <p className="text-xs text-gray-500 mt-1">{currentDirectionNumeric}°</p>
             </div>
           </div>
         )}

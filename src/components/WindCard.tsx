@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { WindDay } from '@/lib/api';
 
 interface WindCardProps {
@@ -7,6 +8,7 @@ interface WindCardProps {
 }
 
 export default function WindCard({ day }: WindCardProps) {
+  const [expanded, setExpanded] = useState(false);
   // Use max wind speed for determining if it's a good day (matches other weather apps)
   const isGoodDay = day.maxWindSpeed >= 15;
   const backgroundColor = day.isWeekend && isGoodDay ? 'bg-green-100 border-green-500' : 'bg-white';
@@ -62,7 +64,33 @@ export default function WindCard({ day }: WindCardProps) {
           Daytime avg: {day.avgWindSpeed} kn
           {day.maxGustSpeed ? ` | Gusts: ${day.maxGustSpeed} kn` : ''}
         </p>
+        <p className="text-xs text-blue-700 font-semibold mt-1">
+          Direction: {day.windDirectionLabel} ({day.windDirection}°)
+        </p>
       </div>
+
+      <button
+        onClick={() => setExpanded((prev) => !prev)}
+        className="w-full py-2 px-4 mb-4 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+      >
+        {expanded ? 'Hide 3h Details' : 'Show 3h Details'}
+      </button>
+
+      {expanded && (
+        <div className="bg-blue-50/25 rounded-xl p-3 border border-blue-200 mb-4">
+          <h3 className="text-sm font-semibold text-blue-800 mb-2">3-hour breakdown</h3>
+          <div className="space-y-2 text-xs text-blue-900 font-medium">
+            {day.threeHourDetails.map((entry) => (
+              <div key={entry.time} className="flex justify-between">
+                <span>{new Date(entry.time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span>{entry.speed.toFixed(1)} kn</span>
+                <span>{entry.directionLabel}</span>
+                <span className="text-blue-700">gust {entry.gust.toFixed(1)} kn</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Condition Indicator */}
       <div className="mb-4">
