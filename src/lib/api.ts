@@ -20,47 +20,53 @@ const getCardinalDirection = (deg: number): string => {
   return directions[index];
 };
 
+const mpsToKnots = (mps: number): number => Number((mps * 1.9438).toFixed(1));
+
 export async function fetchWindData(): Promise<WindDay[]> {
   try {
-    const forecastUrl = new URL('https://api.open-meteo.com/v1/forecast');
-    forecastUrl.searchParams.append('latitude', ZANDVOORT_LAT.toString());
-    forecastUrl.searchParams.append('longitude', ZANDVOORT_LNG.toString());
-    forecastUrl.searchParams.append('hourly', 'wind_speed_10m,wind_gusts_10m,winddirection_10m');
-    forecastUrl.searchParams.append('forecast_days', '7');
-    forecastUrl.searchParams.append('timezone', 'Europe/Amsterdam');
-    forecastUrl.searchParams.append('wind_speed_unit', 'kn');
+    const forecastUrl = new URL('https://api.met.no/weatherapi/locationforecast/2.0/compact');
+    forecastUrl.searchParams.append('lat', ZANDVOORT_LAT.toString());
+    forecastUrl.searchParams.append('lon', ZANDVOORT_LNG.toString());
 
-    const response = await fetch(forecastUrl.toString());
+    const response = await fetch(forecastUrl.toString(), {
+      headers: {
+        'User-Agent': 'kite-wind-app (your-email@example.com)',
+      },
+    });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch wind data');
+      throw new Error('Failed to fetch wind data from Yr.no');
     }
 
-    const data = await response.json();
-    const hourly = data.hourly;
-    const times = hourly.time;
-    const windSpeeds = hourly.wind_speed_10m;
-    const windGusts = hourly.wind_gusts_10m;
-    const windDirections = hourly.winddirection_10m;
+    const json = await response.json();
+    const timeseries = json.properties?.timeseries || [];
 
-    const dailyData: Record<string, { speeds: number[]; gusts: number[]; directions: number[]; details: { time: string; speed: number; gust: number; direction: number }[] }> = {};
+    const dailyData: Record<string, {
+      speeds: number[];
+      gusts: number[];
+      directions: number[];
+      details: { time: string; speed: number; gust: number; direction: number }[];
+    }> = {};
 
-    times.forEach((time: string, index: number) => {
-      const date = new Date(time);
-      const dateStr = date.toISOString().split('T')[0];
+    timeseries.forEach((entry: any) => {
+      const time = entry.time;
+      const details = entry.data?.instant?.details;
+      if (!details || details.wind_speed === undefined) return;
 
-      if (!dailyData[dateStr]) {
-        dailyData[dateStr] = { speeds: [], gusts: [], directions: [], details: [] };
+      const speedKn = mpsToKnots(details.wind_speed);
+      const gustKn = mpsToKnots(details.wind_speed_of_gust || 0);
+      const direction = details.wind_from_direction || 0;
+
+      const localDate = new Date(time).toLocaleDateString('en-CA', { timeZone: 'Europe/Amsterdam' });
+
+      if (!dailyData[localDate]) {
+        dailyData[localDate] = { speeds: [], gusts: [], directions: [], details: [] };
       }
 
-      const speed = windSpeeds[index];
-      const gust = windGusts[index] || 0;
-      const direction = windDirections[index] || 0;
-
-      dailyData[dateStr].speeds.push(speed);
-      dailyData[dateStr].gusts.push(gust);
-      dailyData[dateStr].directions.push(direction);
-      dailyData[dateStr].details.push({ time, speed, gust, direction });
+      dailyData[localDate].speeds.push(speedKn);
+      dailyData[localDate].gusts.push(gustKn);
+      dailyData[localDate].directions.push(direction);
+      dailyData[localDate].details.push({ time, speed: speedKn, gust: gustKn, direction });
     });
 
     const windDays: WindDay[] = Object.entries(dailyData).map(([dateStr, data]) => {
@@ -69,36 +75,30 @@ export async function fetchWindData(): Promise<WindDay[]> {
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
       const daytimeDetails = data.details.filter((item) => {
-        const hour = new Date(item.time).getHours();
+        const hour = Number(new Date(item.time).toLocaleTimeString('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).split(':')[0]);
         return hour >= 9 && hour <= 18;
       });
 
       const avgWindSpeed = daytimeDetails.length > 0
-        ? daytimeDetails.reduce((a, b) => a + b.speed, 0) / daytimeDetails.length
+        ? daytimeDetails.reduce((sum, item) => sum + item.speed, 0) / daytimeDetails.length
         : 0;
 
       const maxWindSpeed = data.speeds.length > 0 ? Math.max(...data.speeds) : 0;
       const maxGustSpeed = data.gusts.length > 0 ? Math.max(...data.gusts) : 0;
-
       const averageDirection = data.directions.length > 0
-        ? data.directions.reduce((acc, d) => acc + d, 0) / data.directions.length
+        ? data.directions.reduce((sum, d) => sum + d, 0) / data.directions.length
         : 0;
 
       const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
 
-      let recommendation = '';
-      if (maxWindSpeed >= 22) {
-        recommendation = 'RRD 5m²';
-      } else if (maxWindSpeed >= 19) {
-        recommendation = 'RRD 7m²';
-      } else if (maxWindSpeed >= 15) {
-        recommendation = '10m² Kite';
-      } else {
-        recommendation = 'Not ideal';
-      }
+      let recommendation = 'Not ideal';
+      const avg = Math.round(avgWindSpeed * 10) / 10;
+      if (avg >= 22) recommendation = 'RRD 5m²';
+      else if (avg >= 19) recommendation = 'RRD 7m²';
+      else if (avg >= 15) recommendation = '10m² Kite';
 
       const threeHourDetails = data.details
-        .filter((item) => new Date(item.time).getHours() % 3 === 0)
+        .filter((item) => Number(new Date(item.time).toLocaleTimeString('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).split(':')[0]) % 3 === 0)
         .map((item) => ({
           time: item.time,
           speed: item.speed,
@@ -109,7 +109,7 @@ export async function fetchWindData(): Promise<WindDay[]> {
 
       return {
         date: dateStr,
-        avgWindSpeed: Math.round(avgWindSpeed * 10) / 10,
+        avgWindSpeed: Math.round(avg * 10) / 10,
         maxWindSpeed: Math.round(maxWindSpeed * 10) / 10,
         maxGustSpeed: Math.round(maxGustSpeed * 10) / 10,
         windDirection: Math.round(averageDirection),
