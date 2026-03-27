@@ -40,7 +40,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 p-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(144,205,255,0.5),_rgba(190,225,255,0.15)_60%,_rgba(235,245,255,0.3))] p-6 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -51,11 +51,11 @@ export default function Home() {
         {/* Stats */}
         {!loading && windData.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Kite Days</p>
               <p className="text-3xl font-bold text-green-600">{kiteDays.length}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Avg Peak Wind</p>
               <p className="text-3xl font-bold text-blue-600">
                 {(
@@ -65,13 +65,13 @@ export default function Home() {
                 kn
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Max Wind</p>
               <p className="text-3xl font-bold text-orange-600">
                 {Math.max(...windData.map((d) => d.maxWindSpeed)).toFixed(1)} kn
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 text-center">
+            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
               <p className="text-gray-600 text-sm font-medium mb-1">Wind Direction</p>
               <p className="text-3xl font-bold text-blue-700">{currentDirection}</p>
               <p className="text-xs text-gray-500 mt-1">{currentDirectionNumeric}°</p>

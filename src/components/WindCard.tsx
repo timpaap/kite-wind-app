@@ -36,7 +36,8 @@ export default function WindCard({ day }: WindCardProps) {
 
   return (
     <div
-      className={`${backgroundColor} ${borderColor} border-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition`}
+      className={`rounded-xl border border-white/30 bg-white/30 backdrop-blur-xl shadow-xl p-6 transition hover:shadow-2xl ${day.isWeekend && isGoodDay ? 'ring-2 ring-emerald-300/60' : ''}`}
+      style={{ backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.15))' }}
     >
       {/* Date Header */}
       <div className="flex justify-between items-start mb-4">
@@ -64,9 +65,6 @@ export default function WindCard({ day }: WindCardProps) {
           Wind: {day.minWindSpeed.toFixed(1)} - {day.maxWindSpeed.toFixed(1)} kn
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Gusts: {day.maxGustSpeed > 0 ? `${day.minGustSpeed.toFixed(1)} - ${day.maxGustSpeed.toFixed(1)} kn` : 'N/A'}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
           Daytime avg: {day.avgWindSpeed} kn
         </p>
         <p className="text-xs text-blue-700 font-semibold mt-1">
@@ -92,7 +90,6 @@ export default function WindCard({ day }: WindCardProps) {
                 <span className="text-gray-700">
                   {entry.directionArrow} {entry.directionLabel}
                 </span>
-                <span className="text-blue-700">gust {entry.gust.toFixed(1)} kn</span>
               </div>
             ))}
           </div>

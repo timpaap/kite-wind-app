@@ -3,15 +3,13 @@ export type WindDay = {
   avgWindSpeed: number;
   minWindSpeed: number;
   maxWindSpeed: number;
-  maxGustSpeed: number;
-  minGustSpeed: number;
   windDirection: number;
   windDirectionLabel: string;
   windDirectionArrow: string;
   isWeekend: boolean;
   dayName: string;
   recommendation: string;
-  threeHourDetails: { time: string; speed: number; gust: number; direction: number; directionLabel: string; directionArrow: string }[];
+  threeHourDetails: { time: string; speed: number; direction: number; directionLabel: string; directionArrow: string }[];
 };
 
 const ZANDVOORT_LAT = 52.3745;
@@ -51,9 +49,8 @@ export async function fetchWindData(): Promise<WindDay[]> {
 
     const dailyData: Record<string, {
       speeds: number[];
-      gusts: number[];
       directions: number[];
-      details: { time: string; speed: number; gust: number; direction: number }[];
+      details: { time: string; speed: number; direction: number }[];
     }> = {};
 
     const getGustMps = (entry: any): number | null => {
@@ -71,22 +68,17 @@ export async function fetchWindData(): Promise<WindDay[]> {
       if (!details || details.wind_speed === undefined) return;
 
       const speedKn = mpsToKnots(details.wind_speed);
-      const gustMps = getGustMps(entry);
-      const gustKn = gustMps != null ? mpsToKnots(gustMps) : 0;
       const direction = details.wind_from_direction || 0;
 
       const localDate = new Date(time).toLocaleDateString('en-CA', { timeZone: 'Europe/Amsterdam' });
 
       if (!dailyData[localDate]) {
-        dailyData[localDate] = { speeds: [], gusts: [], directions: [], details: [] };
+        dailyData[localDate] = { speeds: [], directions: [], details: [] };
       }
 
       dailyData[localDate].speeds.push(speedKn);
-      if (gustMps !== null && gustMps !== undefined) {
-        dailyData[localDate].gusts.push(gustKn);
-      }
       dailyData[localDate].directions.push(direction);
-      dailyData[localDate].details.push({ time, speed: speedKn, gust: gustKn, direction });
+      dailyData[localDate].details.push({ time, speed: speedKn, direction });
     });
 
     const windDays: WindDay[] = Object.entries(dailyData).map(([dateStr, data]) => {
@@ -105,8 +97,6 @@ export async function fetchWindData(): Promise<WindDay[]> {
 
       const minWindSpeed = data.speeds.length > 0 ? Math.min(...data.speeds) : 0;
       const maxWindSpeed = data.speeds.length > 0 ? Math.max(...data.speeds) : 0;
-      const minGustSpeed = data.gusts.length > 0 ? Math.min(...data.gusts) : 0;
-      const maxGustSpeed = data.gusts.length > 0 ? Math.max(...data.gusts) : 0;
       const averageDirection = data.directions.length > 0
         ? data.directions.reduce((sum, d) => sum + d, 0) / data.directions.length
         : 0;
@@ -133,7 +123,6 @@ export async function fetchWindData(): Promise<WindDay[]> {
         .map((item) => ({
           time: item.time,
           speed: item.speed,
-          gust: item.gust,
           direction: item.direction,
           directionLabel: getCardinalDirection(item.direction),
           directionArrow: getDirectionArrow(item.direction),
@@ -144,8 +133,6 @@ export async function fetchWindData(): Promise<WindDay[]> {
         avgWindSpeed: Math.round(avg * 10) / 10,
         minWindSpeed: Math.round(minWindSpeed * 10) / 10,
         maxWindSpeed: Math.round(maxWindSpeed * 10) / 10,
-        minGustSpeed: Math.round(minGustSpeed * 10) / 10,
-        maxGustSpeed: Math.round(maxGustSpeed * 10) / 10,
         windDirection: Math.round(averageDirection),
         windDirectionLabel: getCardinalDirection(averageDirection),
         windDirectionArrow: getDirectionArrow(averageDirection),
