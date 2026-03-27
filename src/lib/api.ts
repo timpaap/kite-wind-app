@@ -56,12 +56,13 @@ export async function fetchWindData(): Promise<WindDay[]> {
       details: { time: string; speed: number; gust: number; direction: number }[];
     }> = {};
 
-    const getGustMps = (entry: any): number => {
+    const getGustMps = (entry: any): number | null => {
       const instantGust = entry.data?.instant?.details?.wind_speed_of_gust;
       const next1hGust = entry.data?.next_1_hours?.details?.wind_speed_of_gust;
       const next6hGust = entry.data?.next_6_hours?.details?.wind_speed_of_gust;
+      const next12hGust = entry.data?.next_12_hours?.details?.wind_speed_of_gust;
 
-      return instantGust ?? next1hGust ?? next6hGust ?? 0;
+      return instantGust ?? next1hGust ?? next6hGust ?? next12hGust ?? null;
     };
 
     timeseries.forEach((entry: any) => {
@@ -70,7 +71,8 @@ export async function fetchWindData(): Promise<WindDay[]> {
       if (!details || details.wind_speed === undefined) return;
 
       const speedKn = mpsToKnots(details.wind_speed);
-      const gustKn = mpsToKnots(getGustMps(entry));
+      const gustMps = getGustMps(entry);
+      const gustKn = gustMps != null ? mpsToKnots(gustMps) : 0;
       const direction = details.wind_from_direction || 0;
 
       const localDate = new Date(time).toLocaleDateString('en-CA', { timeZone: 'Europe/Amsterdam' });
@@ -80,7 +82,9 @@ export async function fetchWindData(): Promise<WindDay[]> {
       }
 
       dailyData[localDate].speeds.push(speedKn);
-      dailyData[localDate].gusts.push(gustKn);
+      if (gustMps !== null && gustMps !== undefined) {
+        dailyData[localDate].gusts.push(gustKn);
+      }
       dailyData[localDate].directions.push(direction);
       dailyData[localDate].details.push({ time, speed: speedKn, gust: gustKn, direction });
     });

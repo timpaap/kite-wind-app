@@ -64,7 +64,7 @@ export default function WindCard({ day }: WindCardProps) {
           Wind: {day.minWindSpeed.toFixed(1)} - {day.maxWindSpeed.toFixed(1)} kn
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          Gusts: {day.minGustSpeed.toFixed(1)} - {day.maxGustSpeed.toFixed(1)} kn
+          Gusts: {day.maxGustSpeed > 0 ? `${day.minGustSpeed.toFixed(1)} - ${day.maxGustSpeed.toFixed(1)} kn` : 'N/A'}
         </p>
         <p className="text-xs text-gray-500 mt-1">
           Daytime avg: {day.avgWindSpeed} kn
