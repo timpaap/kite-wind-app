@@ -40,24 +40,24 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(144,205,255,0.5),_rgba(190,225,255,0.15)_60%,_rgba(235,245,255,0.3))] p-6 backdrop-blur-sm">
+    <main className="min-h-screen bg-[#f8f9fa] p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-900 mb-2">🪁 Kite Wind App</h1>
-          <p className="text-lg text-blue-700">Zandvoort aan Zee • 7-Day Forecast</p>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">🪁 Kite Wind App</h1>
+          <p className="text-lg text-gray-600">Zandvoort aan Zee • 7-Day Forecast</p>
         </div>
 
         {/* Stats */}
         {!loading && windData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
-              <p className="text-gray-600 text-sm font-medium mb-1">Kite Days</p>
-              <p className="text-3xl font-bold text-green-600">{kiteDays.length}</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+              <p className="text-gray-500 text-sm font-medium mb-2">Kite Days</p>
+              <p className="text-3xl font-bold text-gray-900">{kiteDays.length}</p>
             </div>
-            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
-              <p className="text-gray-600 text-sm font-medium mb-1">Avg Peak Wind</p>
-              <p className="text-3xl font-bold text-blue-600">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+              <p className="text-gray-500 text-sm font-medium mb-2">Avg Peak Wind</p>
+              <p className="text-3xl font-bold text-gray-900">
                 {(
                   windData.reduce((sum, day) => sum + day.maxWindSpeed, 0) /
                   windData.length
@@ -65,27 +65,27 @@ export default function Home() {
                 kn
               </p>
             </div>
-            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
-              <p className="text-gray-600 text-sm font-medium mb-1">Max Wind</p>
-              <p className="text-3xl font-bold text-orange-600">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+              <p className="text-gray-500 text-sm font-medium mb-2">Max Wind</p>
+              <p className="text-3xl font-bold text-gray-900">
                 {Math.max(...windData.map((d) => d.maxWindSpeed)).toFixed(1)} kn
               </p>
             </div>
-            <div className="bg-white/30 backdrop-blur-md border border-white/40 rounded-xl shadow-lg p-4 text-center">
-              <p className="text-gray-600 text-sm font-medium mb-1">Wind Direction</p>
-              <p className="text-3xl font-bold text-blue-700">{currentDirection}</p>
-              <p className="text-xs text-gray-500 mt-1">{currentDirectionNumeric}°</p>
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+              <p className="text-gray-500 text-sm font-medium mb-2">Wind Direction</p>
+              <p className="text-3xl font-bold text-gray-900">{currentDirection}</p>
+              <p className="text-sm text-gray-500 mt-1">{currentDirectionNumeric}°</p>
             </div>
           </div>
         )}
 
         {/* Export Button */}
         {!loading && windData.length > 0 && (
-          <div className="text-center mb-8">
+          <div className="text-center mb-12">
             <button
               onClick={handleExport}
               disabled={kiteDays.length === 0}
-              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-3 px-8 rounded-lg transition"
+              className="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium py-3 px-8 rounded-lg transition"
             >
               📅 Export Kite Days to Apple Calendar
             </button>
@@ -95,20 +95,20 @@ export default function Home() {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
-            <p className="text-lg text-blue-700">Loading wind data...</p>
+            <p className="text-lg text-gray-600">Loading wind data...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
 
         {/* Wind Cards */}
         {!loading && windData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {windData.map((day) => (
               <WindCard key={day.date} day={day} />
             ))}
@@ -117,20 +117,20 @@ export default function Home() {
 
         {/* Legend */}
         {!loading && windData.length > 0 && (
-          <div className="mt-12 bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Kite Recommendations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="border-l-4 border-blue-500 pl-4">
-                <p className="font-semibold text-blue-900">10m² Kite</p>
-                <p className="text-gray-600">15-22 knots</p>
+          <div className="mt-16 bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Kite Recommendations</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="border-l-4 border-gray-300 pl-6">
+                <p className="font-medium text-gray-900">10m² Kite</p>
+                <p className="text-gray-500 text-sm">15-22 knots</p>
               </div>
-              <div className="border-l-4 border-purple-500 pl-4">
-                <p className="font-semibold text-purple-900">RRD 7m²</p>
-                <p className="text-gray-600">19-27 knots</p>
+              <div className="border-l-4 border-gray-300 pl-6">
+                <p className="font-medium text-gray-900">RRD 7m²</p>
+                <p className="text-gray-500 text-sm">19-27 knots</p>
               </div>
-              <div className="border-l-4 border-red-500 pl-4">
-                <p className="font-semibold text-red-900">RRD 5m²</p>
-                <p className="text-gray-600">22-35 knots</p>
+              <div className="border-l-4 border-gray-300 pl-6">
+                <p className="font-medium text-gray-900">RRD 5m²</p>
+                <p className="text-gray-500 text-sm">22-35 knots</p>
               </div>
             </div>
           </div>
