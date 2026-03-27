@@ -29,7 +29,7 @@ DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 CREATED:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 LAST-MODIFIED:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:🪁 Kite Day - ${day.recommendation} (${day.maxWindSpeed}kn)
-DESCRIPTION:Perfect for kiteboarding at Zandvoort aan Zee\\nPeak wind: ${day.maxWindSpeed} knots\\nDaytime average: ${day.avgWindSpeed} knots\\nRecommended kite: ${day.recommendation}${day.maxGustSpeed ? `\\nGusts: ${day.maxGustSpeed} knots` : ''}
+DESCRIPTION:Perfect for kiteboarding at Zandvoort aan Zee\nPeak wind: ${day.maxWindSpeed} knots\nDaytime average: ${day.avgWindSpeed} knots\nRecommended kite: ${day.recommendation}
 LOCATION:Zandvoort aan Zee, Netherlands
 STATUS:CONFIRMED
 SEQUENCE:0
