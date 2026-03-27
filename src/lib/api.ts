@@ -24,18 +24,11 @@ const mpsToKnots = (mps: number): number => Number((mps * 1.9438).toFixed(1));
 
 export async function fetchWindData(): Promise<WindDay[]> {
   try {
-    const forecastUrl = new URL('https://api.met.no/weatherapi/locationforecast/2.0/compact');
-    forecastUrl.searchParams.append('lat', ZANDVOORT_LAT.toString());
-    forecastUrl.searchParams.append('lon', ZANDVOORT_LNG.toString());
-
-    const response = await fetch(forecastUrl.toString(), {
-      headers: {
-        'User-Agent': 'kite-wind-app (your-email@example.com)',
-      },
-    });
+    const response = await fetch('/api/wind');
 
     if (!response.ok) {
-      throw new Error('Failed to fetch wind data from Yr.no');
+      const errorText = await response.text();
+      throw new Error(`Failed to load wind data from proxy: ${response.status} ${errorText}`);
     }
 
     const json = await response.json();
