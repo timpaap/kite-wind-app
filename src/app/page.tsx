@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import WindCard from '@/components/WindCard';
 import { fetchWindData, type WindDay } from '@/lib/api';
-import { exportToICS } from '@/lib/ics-export';
+import { exportToICS, exportWeekendToICS } from '@/lib/ics-export';
 
 export default function Home() {
   const [windData, setWindData] = useState<WindDay[]>([]);
@@ -27,9 +27,9 @@ export default function Home() {
   }, []);
 
   const kiteDays = windData.filter((day) => day.maxWindSpeed >= 15);
-  const firstDay = windData[0];
-  const currentDirection = firstDay?.windDirectionLabel ?? '-';
-  const currentDirectionNumeric = firstDay?.windDirection ?? 0;
+  const weekendKiteDays = kiteDays.filter((day) => day.isWeekend);
+  const bestKiteDay = kiteDays.reduce((best, current) => 
+    current.maxWindSpeed > best.maxWindSpeed ? current : best, kiteDays[0] || null);
 
   const handleExport = () => {
     if (kiteDays.length === 0) {
@@ -37,6 +37,14 @@ export default function Home() {
       return;
     }
     exportToICS(kiteDays);
+  };
+
+  const handleWeekendExport = () => {
+    if (weekendKiteDays.length === 0) {
+      alert('No suitable weekend kite days to export');
+      return;
+    }
+    exportWeekendToICS(kiteDays);
   };
 
   return (
@@ -50,44 +58,36 @@ export default function Home() {
 
         {/* Stats */}
         {!loading && windData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-12">
+            <div className="text-center">
               <p className="text-gray-500 text-sm font-medium mb-2">Kite Days</p>
-              <p className="text-3xl font-bold text-gray-900">{kiteDays.length}</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
-              <p className="text-gray-500 text-sm font-medium mb-2">Avg Peak Wind</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {(
-                  windData.reduce((sum, day) => sum + day.maxWindSpeed, 0) /
-                  windData.length
-                ).toFixed(1)}{' '}
-                kn
-              </p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
-              <p className="text-gray-500 text-sm font-medium mb-2">Max Wind</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {Math.max(...windData.map((d) => d.maxWindSpeed)).toFixed(1)} kn
-              </p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 text-center">
-              <p className="text-gray-500 text-sm font-medium mb-2">Wind Direction</p>
-              <p className="text-3xl font-bold text-gray-900">{currentDirection}</p>
-              <p className="text-sm text-gray-500 mt-1">{currentDirectionNumeric}°</p>
+              <p className="text-4xl font-bold text-gray-900 mb-4">{kiteDays.length}</p>
+              {bestKiteDay && (
+                <p className="text-sm text-gray-600">
+                  Best day: <span className="font-medium">{bestKiteDay.dayName}</span> with {bestKiteDay.maxWindSpeed}kn winds
+                  {bestKiteDay.isWeekend && <span className="text-green-600 font-medium"> (weekend!)</span>}
+                </p>
+              )}
             </div>
           </div>
         )}
 
-        {/* Export Button */}
+        {/* Export Buttons */}
         {!loading && windData.length > 0 && (
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 space-y-4">
             <button
               onClick={handleExport}
               disabled={kiteDays.length === 0}
-              className="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium py-3 px-8 rounded-lg transition"
+              className="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium py-3 px-8 rounded-lg transition mr-4"
             >
-              📅 Export Kite Days to Apple Calendar
+              📅 Export All Kite Days to Apple Calendar
+            </button>
+            <button
+              onClick={handleWeekendExport}
+              disabled={weekendKiteDays.length === 0}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-8 rounded-lg transition"
+            >
+              🏖️ Export Weekend Kite Days to Apple Calendar
             </button>
           </div>
         )}
