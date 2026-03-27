@@ -56,13 +56,21 @@ export async function fetchWindData(): Promise<WindDay[]> {
       details: { time: string; speed: number; gust: number; direction: number }[];
     }> = {};
 
+    const getGustMps = (entry: any): number => {
+      const instantGust = entry.data?.instant?.details?.wind_speed_of_gust;
+      const next1hGust = entry.data?.next_1_hours?.details?.wind_speed_of_gust;
+      const next6hGust = entry.data?.next_6_hours?.details?.wind_speed_of_gust;
+
+      return instantGust ?? next1hGust ?? next6hGust ?? 0;
+    };
+
     timeseries.forEach((entry: any) => {
       const time = entry.time;
       const details = entry.data?.instant?.details;
       if (!details || details.wind_speed === undefined) return;
 
       const speedKn = mpsToKnots(details.wind_speed);
-      const gustKn = mpsToKnots(details.wind_speed_of_gust || 0);
+      const gustKn = mpsToKnots(getGustMps(entry));
       const direction = details.wind_from_direction || 0;
 
       const localDate = new Date(time).toLocaleDateString('en-CA', { timeZone: 'Europe/Amsterdam' });
