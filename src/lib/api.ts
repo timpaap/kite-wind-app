@@ -1,14 +1,17 @@
 export type WindDay = {
   date: string;
   avgWindSpeed: number;
+  minWindSpeed: number;
   maxWindSpeed: number;
   maxGustSpeed: number;
+  minGustSpeed: number;
   windDirection: number;
   windDirectionLabel: string;
+  windDirectionArrow: string;
   isWeekend: boolean;
   dayName: string;
   recommendation: string;
-  threeHourDetails: { time: string; speed: number; gust: number; direction: number; directionLabel: string }[];
+  threeHourDetails: { time: string; speed: number; gust: number; direction: number; directionLabel: string; directionArrow: string }[];
 };
 
 const ZANDVOORT_LAT = 52.3745;
@@ -18,6 +21,18 @@ const getCardinalDirection = (deg: number): string => {
   const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
   const index = Math.round(((deg % 360 + 360) % 360) / 22.5) % 16;
   return directions[index];
+};
+
+const getDirectionArrow = (deg: number): string => {
+  const heading = ((deg + 180) % 360 + 360) % 360; // heading from direction
+  if (heading >= 337.5 || heading < 22.5) return '↑';
+  if (heading < 67.5) return '↗';
+  if (heading < 112.5) return '→';
+  if (heading < 157.5) return '↘';
+  if (heading < 202.5) return '↓';
+  if (heading < 247.5) return '↙';
+  if (heading < 292.5) return '←';
+  return '↖';
 };
 
 const mpsToKnots = (mps: number): number => Number((mps * 1.9438).toFixed(1));
@@ -76,7 +91,9 @@ export async function fetchWindData(): Promise<WindDay[]> {
         ? daytimeDetails.reduce((sum, item) => sum + item.speed, 0) / daytimeDetails.length
         : 0;
 
+      const minWindSpeed = data.speeds.length > 0 ? Math.min(...data.speeds) : 0;
       const maxWindSpeed = data.speeds.length > 0 ? Math.max(...data.speeds) : 0;
+      const minGustSpeed = data.gusts.length > 0 ? Math.min(...data.gusts) : 0;
       const maxGustSpeed = data.gusts.length > 0 ? Math.max(...data.gusts) : 0;
       const averageDirection = data.directions.length > 0
         ? data.directions.reduce((sum, d) => sum + d, 0) / data.directions.length
@@ -91,22 +108,35 @@ export async function fetchWindData(): Promise<WindDay[]> {
       else if (avg >= 15) recommendation = '10m² Kite';
 
       const threeHourDetails = data.details
-        .filter((item) => Number(new Date(item.time).toLocaleTimeString('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).split(':')[0]) % 3 === 0)
+        .filter((item) => {
+          const localHour = Number(
+            new Date(item.time).toLocaleTimeString('en-GB', {
+              timeZone: 'Europe/Amsterdam',
+              hour: '2-digit',
+              hour12: false,
+            }).split(':')[0]
+          );
+          return ((localHour - 1 + 24) % 3) === 0; // start at 1h (1,4,7,...) 
+        })
         .map((item) => ({
           time: item.time,
           speed: item.speed,
           gust: item.gust,
           direction: item.direction,
           directionLabel: getCardinalDirection(item.direction),
+          directionArrow: getDirectionArrow(item.direction),
         }));
 
       return {
         date: dateStr,
         avgWindSpeed: Math.round(avg * 10) / 10,
+        minWindSpeed: Math.round(minWindSpeed * 10) / 10,
         maxWindSpeed: Math.round(maxWindSpeed * 10) / 10,
+        minGustSpeed: Math.round(minGustSpeed * 10) / 10,
         maxGustSpeed: Math.round(maxGustSpeed * 10) / 10,
         windDirection: Math.round(averageDirection),
         windDirectionLabel: getCardinalDirection(averageDirection),
+        windDirectionArrow: getDirectionArrow(averageDirection),
         isWeekend,
         dayName,
         recommendation,

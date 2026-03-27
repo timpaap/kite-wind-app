@@ -61,11 +61,16 @@ export default function WindCard({ day }: WindCardProps) {
           <span className="text-lg ml-1">kn</span>
         </p>
         <p className="text-xs text-gray-500 mt-1">
+          Wind: {day.minWindSpeed.toFixed(1)} - {day.maxWindSpeed.toFixed(1)} kn
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          Gusts: {day.minGustSpeed.toFixed(1)} - {day.maxGustSpeed.toFixed(1)} kn
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
           Daytime avg: {day.avgWindSpeed} kn
-          {day.maxGustSpeed ? ` | Gusts: ${day.maxGustSpeed} kn` : ''}
         </p>
         <p className="text-xs text-blue-700 font-semibold mt-1">
-          Direction: {day.windDirectionLabel} ({day.windDirection}°)
+          Direction: {day.windDirectionArrow} {day.windDirectionLabel} ({day.windDirection}°)
         </p>
       </div>
 
@@ -81,10 +86,12 @@ export default function WindCard({ day }: WindCardProps) {
           <h3 className="text-sm font-semibold text-blue-800 mb-2">3-hour breakdown</h3>
           <div className="space-y-2 text-xs text-blue-900 font-medium">
             {day.threeHourDetails.map((entry) => (
-              <div key={entry.time} className="flex justify-between">
+              <div key={entry.time} className="flex justify-between items-center gap-1">
                 <span>{new Date(entry.time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
                 <span>{entry.speed.toFixed(1)} kn</span>
-                <span>{entry.directionLabel}</span>
+                <span className="text-gray-700">
+                  {entry.directionArrow} {entry.directionLabel}
+                </span>
                 <span className="text-blue-700">gust {entry.gust.toFixed(1)} kn</span>
               </div>
             ))}
