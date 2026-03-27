@@ -79,15 +79,15 @@ export async function fetchWindData(): Promise<WindDay[]> {
 
       const daytimeDetails = data.details.filter((item) => {
         const hour = Number(new Date(item.time).toLocaleTimeString('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', hour12: false }).split(':')[0]);
-        return hour >= 9 && hour <= 18;
+        return hour >= 10 && hour <= 19;
       });
 
       const avgWindSpeed = daytimeDetails.length > 0
         ? daytimeDetails.reduce((sum, item) => sum + item.speed, 0) / daytimeDetails.length
         : 0;
 
-      const minWindSpeed = data.speeds.length > 0 ? Math.min(...data.speeds) : 0;
-      const maxWindSpeed = data.speeds.length > 0 ? Math.max(...data.speeds) : 0;
+      const minWindSpeed = daytimeDetails.length > 0 ? Math.min(...daytimeDetails.map(d => d.speed)) : 0;
+      const maxWindSpeed = daytimeDetails.length > 0 ? Math.max(...daytimeDetails.map(d => d.speed)) : 0;
       const averageDirection = data.directions.length > 0
         ? data.directions.reduce((sum, d) => sum + d, 0) / data.directions.length
         : 0;
